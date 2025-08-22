@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
 
 interface Task {
   id: number;
@@ -15,7 +16,6 @@ export default function HomePage() {
   const [theme, setTheme] = useState("light");
   const [unit, setUnit] = useState("metric");
 
-  // Load tasks + settings from localStorage
   useEffect(() => {
     const savedTasks = localStorage.getItem("tasks");
     if (savedTasks) setTasks(JSON.parse(savedTasks));
@@ -30,6 +30,14 @@ export default function HomePage() {
   const pending = tasks.filter((t) => t.status === "Pending").length;
   const inProgress = tasks.filter((t) => t.status === "In Progress").length;
   const completed = tasks.filter((t) => t.status === "Completed").length;
+
+  const data = [
+    { name: "Pending", value: pending },
+    { name: "In Progress", value: inProgress },
+    { name: "Completed", value: completed },
+  ];
+
+  const COLORS = ["#f87171", "#facc15", "#4ade80"]; // red, yellow, green
 
   return (
     <div className="p-6 space-y-6">
@@ -49,6 +57,29 @@ export default function HomePage() {
           <p className="text-xl font-bold">{completed}</p>
           <p className="text-sm text-green-700">Completed</p>
         </div>
+      </div>
+
+      {/* Chart */}
+      <div className="bg-white shadow rounded-xl p-6 flex justify-center">
+        <PieChart width={350} height={300}>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            label={({ name, percent }) =>
+              `${name} ${(percent * 100).toFixed(0)}%`
+            }
+            outerRadius={100}
+            dataKey="value"
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip />
+          <Legend />
+        </PieChart>
       </div>
 
       {/* Quick Links */}
@@ -81,4 +112,4 @@ export default function HomePage() {
       </div>
     </div>
   );
-          }
+}
